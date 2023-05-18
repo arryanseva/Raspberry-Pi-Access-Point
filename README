@@ -1,0 +1,6 @@
+Folder ini berisi file TA yang masih :
+- multiple SKU
+- Inbound sudah worst case, isolated kalo ga ada di SJ
+- Outbound sudah worst case, isolated kalo ga ada di SJ
+- Stocking, Picking, SO sudah multiple scanner + cancel
+- ada tombol start untuk picking dan stocking
