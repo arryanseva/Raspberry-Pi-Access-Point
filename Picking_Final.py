@@ -68,6 +68,7 @@ port_socket = {"1236" : first_sock,
                "1237" : second_sock}
 state_picking = []
 
+### Fungsi Finding State Picking - Start
 def searching():
     while True :
         time.sleep(3)
@@ -87,9 +88,10 @@ def searching():
             pprint.pprint(data_received_log_picking)
             print("")
             
-            ####CUMA 1 picking yang harus isfull :true  dan ischecked :false
+            
             for data in data_received_log_picking:
                 if (data["isFull"] == True and data["isUp"] == True and data["isChecked"] == True and data["isRequested"] == True and data["isDown"] == True):
+                    ### Fungsi Pull Data Barang - Start
                     coordinat_picking = data["blok"] + str(data["level"]) + str(data["nomor_rak"])
                     coordinat_id_picking = str(data["id"])
                     add_state_picking = {"coordinat_picking" : coordinat_picking,
@@ -118,7 +120,8 @@ def searching():
                         print(response_cd_picking.text)
                         
                     print("")
-                    
+                    ### Fungsi Pull Data Barang - End
+                           
                     find = 0 
                     for i in range (5):
                         url_log_picking2 = "https://octagonwms.herokuapp.com/coord"
@@ -151,7 +154,7 @@ def searching():
                                 state_picking.append(add_state_picking)
                     else:
                         find = 0 
-                
+                #Pembatalan proses picking
                 if (data["isFull"] == True and data["isUp"] == True and data["isChecked"] == True and data["isRequested"] == True and data["isDown"] == False):
                     coordinat_picking_cancel = data["blok"] + str(data["level"]) + str(data["nomor_rak"])
                     coordinat_id_picking_cancel = str(data["id"])
@@ -194,13 +197,14 @@ def searching():
             print(response_log_picking.text)
             
         print("")
+### Fungsi Finding State Picking - End
 
 def rack1():
     while True :
         print(f"State_picking rack1 awal : {state_picking} ")
         time.sleep(5)
         if len(state_picking) != 0:
-            
+            #State Picking ditemukan pada rak 1
             for coordinate in state_picking:
                 
                 if coordinate["coordinat_picking"] == "A11":
@@ -217,15 +221,18 @@ def rack1():
                         while (compare != 1):
                             
                             time.sleep(1)
+                            ### Fungsi Rack Scanner Mode Control - Start
                             data_send_picking = str(3) #Menyalakan Rack Scanner
                             data_send_encode_picking = data_send_picking + "\0"
                             port_socket[str(ip_port[coor_ip[coordinate["coordinat_picking"]]])].sendto(data_send_encode_picking.encode(), (coor_ip[coordinate["coordinat_picking"]], ip_port[coor_ip[coordinate["coordinat_picking"]]]))
                             print("Data "+str(data_send_picking)+" telah dikirim ke ESP32 dengan addr "+str(coor_ip[coordinate["coordinat_picking"]])+" port "+str(ip_port[coor_ip[coordinate["coordinat_picking"]]])+" untuk menyalakan Rack Scanner. (Picking)")
-                            
+                            ### Fungsi Rack Scanner Mode Control - End
+                                   
                             try:
                                 data_picking, addr_picking = ip_sock[coor_ip[coordinate["coordinat_picking"]]].recvfrom(1200)
                                 
                                 #data bytes dari ESP32 diubah menjadi array of integer
+                                ### Fungsi Konversi bytes to string - Start    
                                 i_picking = 0
                                 arry_picking = []
 
@@ -265,7 +272,8 @@ def rack1():
                                 print(f"SKU yang terbaca di rak A11 :{sku_picking}")
                                 print(f"SKU yang dipicking di rak A11:{read_sku_picking}")
                                 print(f"SKU yang seharusnya dipicking di rak A11:{must_sku}")
-                
+                                ### Fungsi Konversi bytes to string - End
+                                ### Fungsi Picking Behavioral - Start       
                                 if sku_picking != "00" :
                                     
                                     sku_send = []
@@ -352,7 +360,8 @@ def rack1():
                                             else:
                                                 
                                                 compare = 1   
-                                    
+                                
+                                ### Fungsi Picking Behavioral - End     
                                 print(countsss)
                                 countsss = countsss + 1
                                 print("")
@@ -375,7 +384,7 @@ def rack1():
                                 
                         
                         if (compare == 1 and coordinate["status"] == "ON"):
-                        
+                            ### Fungsi Status Updater - Start 
                             # URL endpoint API di Heroku
                             url_picking = "https://octagonwms.herokuapp.com/coord/request"
 
@@ -387,31 +396,31 @@ def rack1():
                             headers_picking ={'Content-type': 'application/json'}
                             # Mengirim data menggunakan metode POST dan headers yang sudah ditentukan
                             response_picking = requests.put(url=url_picking, data=json_data_picking, headers=headers_picking)
-
+                            ### Fungsi Status Updater - End
+                                   
                             # Mengecek respons dari server
                             if response_picking.status_code == 200:
                                 print("Data berhasil dikirim ke server dan Picking berhasil.")
                                 state_picking.remove(coordinate)
-                                print(f"state picking removed rack 1: {state_picking}")
-                                status_picking = 1
-                                print(f"Rack 1 : State_Picking {state_picking}")
+                                
 
                             else:
                                 print("Data gagal dikirim ke server. Status code:", response_picking.status_code)
                                 print(response_picking.text)
+                                state_picking.remove(coordinate)
                                 
                     
                             print("")
                             
                         if (compare == 1 and coordinate["status"] == "OFF"):
                             state_picking.remove(coordinate)
-                            status_picking = 1
+                            
 def rack2():
     while True :
         print(f"State_picking rack2 awal : {state_picking} ")
         time.sleep(5)
         if len(state_picking) != 0:
-            
+            #State Picking ditemukan pada rak 2
             for coordinate in state_picking:
                 
                 if coordinate["coordinat_picking"] == "A21":
@@ -428,15 +437,18 @@ def rack2():
                         while (compare != 1):
                             
                             time.sleep(1)
+                            ### Fungsi Rack Scanner Mode Control - Start
                             data_send_picking = str(3) #Menyalakan Rack Scanner
                             data_send_encode_picking = data_send_picking + "\0"
                             port_socket[str(ip_port[coor_ip[coordinate["coordinat_picking"]]])].sendto(data_send_encode_picking.encode(), (coor_ip[coordinate["coordinat_picking"]], ip_port[coor_ip[coordinate["coordinat_picking"]]]))
                             print("Data "+str(data_send_picking)+" telah dikirim ke ESP32 dengan addr "+str(coor_ip[coordinate["coordinat_picking"]])+" port "+str(ip_port[coor_ip[coordinate["coordinat_picking"]]])+" untuk menyalakan Rack Scanner. (Picking)")
-                            
+                            ### Fungsi Rack Scanner Mode Control - End
+                                   
                             try:
                                 data_picking, addr_picking = ip_sock[coor_ip[coordinate["coordinat_picking"]]].recvfrom(1200)
                                 
                                 #data bytes dari ESP32 diubah menjadi array of integer
+                                ### Fungsi Konversi bytes to string - Start 
                                 i_picking = 0
                                 arry_picking = []
 
@@ -476,7 +488,8 @@ def rack2():
                                 print(f"SKU yang terbaca di rak A21 :{sku_picking}")
                                 print(f"SKU yang dipicking di rak A21:{read_sku_picking}")
                                 print(f"SKU yang seharusnya dipicking di rak A21:{must_sku}")
-                
+                                ### Fungsi Konversi bytes to string - End
+                                ### Fungsi Picking Behavioral - Start  
                                 if sku_picking != "00" :
                                     
                                     sku_send = []
@@ -562,7 +575,7 @@ def rack2():
                                             else:
                                                 
                                                 compare = 1   
-                                    
+                                ### Fungsi Picking Behavioral - End    
                                 print(countsss)
                                 countsss = countsss + 1
                                 print("")
@@ -585,7 +598,7 @@ def rack2():
                                 
                         
                         if (compare == 1 and coordinate["status"] == "ON"):
-                        
+                            ### Fungsi Status Updater - Start       
                             # URL endpoint API di Heroku
                             url_picking = "https://octagonwms.herokuapp.com/coord/request"
 
@@ -597,25 +610,23 @@ def rack2():
                             headers_picking ={'Content-type': 'application/json'}
                             # Mengirim data menggunakan metode POST dan headers yang sudah ditentukan
                             response_picking = requests.put(url=url_picking, data=json_data_picking, headers=headers_picking)
-
+                            ### Fungsi Status Updater - End
+                                   
                             # Mengecek respons dari server
                             if response_picking.status_code == 200:
                                 print("Data berhasil dikirim ke server dan Picking berhasil.")
                                 state_picking.remove(coordinate)
-                                print(f"state picking removed rack 2: {state_picking}")
-                                status_picking = 1
-                                print(f"Rack 2 : State_Picking {state_picking}")
 
                             else:
                                 print("Data gagal dikirim ke server. Status code:", response_picking.status_code)
                                 print(response_picking.text)
-                                
+                                state_picking.remove(coordinate)
                     
                             print("")
                             
                         if (compare == 1 and coordinate["status"] == "OFF"):
                             state_picking.remove(coordinate)
-                            status_picking = 1
+                            
 
 
 t1 = threading.Thread(target=searching)
