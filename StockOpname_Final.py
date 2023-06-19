@@ -68,6 +68,7 @@ port_socket = {"1236" : first_sock,
                "1237" : second_sock}
 state_stockopname = []
 
+### Fungsi Finding State Stock Opname - Start
 def searching():
     while True :
         
@@ -112,7 +113,7 @@ def searching():
                     else:
                         if (state_stockopname[0]["count"] == len(coordinate_rack)):
                             
-                            
+                            ### Fungsi Rack Scanners Data Collector - Start
                             value_send_stockopname = {"data" : []}
                             counts_send_stockopname = 1
                             
@@ -138,8 +139,9 @@ def searching():
                             
                             print("")
                             print(value_send_stockopname)
-                            
-                        
+                            ### Fungsi Rack Scanners Data Collector - End
+
+                            ### Fungsi Send Data - Start
                             # URL endpoint API di Heroku
                             url_stockopname_update = "https://octagonwms.herokuapp.com/realdata"
 
@@ -147,7 +149,8 @@ def searching():
                             headers_stockopname_update ={'Content-type': 'application/json'}
                             # Mengirim data menggunakan metode get params body dan headers yang sudah ditentukan
                             response_stockopname_update = requests.get(url=url_stockopname_update, data=json_data_stockopname_update, headers=headers_stockopname_update)
-
+                            ### Fungsi Send Data - End
+                                 
                             # Mengecek respons dari server
                             if response_stockopname_update.status_code == 200:
                                 
@@ -156,6 +159,8 @@ def searching():
                                 data_received_stockopname_update = json.loads(response_stockopname_update.text)
                                 pprint.pprint(data_received_stockopname_update)
                                 print("")
+
+                                ### Fungsi Status Updater - Start 
                                 # URL endpoint API di Heroku
                                 url_stockopname_change = "https://octagonwms.herokuapp.com/stockopname"
 
@@ -166,7 +171,8 @@ def searching():
                                 json_data_stockopname_change = json.dumps(data_change)
                                 headers_stockopname_change ={'Content-type': 'application/json'}
                                 response_stockopname_change = requests.put(url=url_stockopname_change, data=json_data_stockopname_change, headers=headers_stockopname_change)
-
+                                ### Fungsi Status Updater - End
+                                       
                                 # Mengecek respons dari server
                                 if response_stockopname_change.status_code == 200:
                                 
@@ -181,10 +187,20 @@ def searching():
                                 else:
                                     print("Data gagal dikirim ke server. Status code:", response_stockopname_change.status_code)
                                     print(response_stockopname_change.text)
+                                           
+                                    state_stockopname.remove(state_stockopname[0])
+                                    
+                                    for elemen_rack in coordinate_rack :
+                                        elemen_rack[1] = "notsukses"
 
                             else:
                                 print("Data gagal dikirim ke server. Status code:", response_stockopname_update.status_code)
                                 print(response_stockopname_update.text)
+                                state_stockopname.remove(state_stockopname[0])
+                                    
+                                for elemen_rack in coordinate_rack :
+                                    elemen_rack[1] = "notsukses" 
+                                           
                             print("")
                                    
         else:
@@ -192,21 +208,22 @@ def searching():
             print(response_log_stockopname.text)
             
         print("")
+### Fungsi Finding State Stock Opname - End
 
 def rack1():
     while True :
         
         if len(state_stockopname) == 1:
-            
+            #Perintah Stock Opname ditemukan
             for coordinate in coordinate_rack:
                 
                 if coordinate[0] == "A11" and coordinate[1] == "notsukses":
-                    
+                    ### Fungsi Rack Scanner Mode Control - Start
                     data_send_stockopname = str(2) #Menyalakan Rack Scanner
                     data_send_encode_stockopname = data_send_stockopname + "\0"
                     port_socket[str(ip_port[coor_ip[coordinate[0]]])].sendto(data_send_encode_stockopname.encode(), (coor_ip[coordinate[0]], ip_port[coor_ip[coordinate[0]]]))
                     print(f"Data {data_send_stockopname} telah dikirim ke ESP32 dengan addr {coor_ip[coordinate[0]]} port {ip_port[coor_ip[coordinate[0]]]} untuk menyalakan Rack Scanner. (StockOpname)")
-                    
+                    ### Fungsi Rack Scanner Mode Control - End
                     try:
                         data_stockopname, addr_stockopname = ip_sock[coor_ip[coordinate[0]]].recvfrom(4096)
                         reply_stockopname = "sukses"
@@ -214,6 +231,7 @@ def rack1():
                         port_socket[str(ip_port[addr_stockopname[0]])].sendto(reply_encode_stockopname.encode(), (addr_stockopname[0], ip_port[addr_stockopname[0]]))
 
                         #data bytes dari ESP32 diubah menjadi array of integer
+                        ### Fungsi Konversi bytes to string - Start
                         i_stockopname = 0
                         arry_stockopname = []
 
@@ -247,7 +265,8 @@ def rack1():
                         for elemen_sku in arry_bytes_str_stockopname:
                             sku_stockopname = sku_stockopname + elemen_sku
                         
-                        sku_stockopname = sku_stockopname.upper() #cuma nerima dan ngirim 1 SKU
+                        sku_stockopname = sku_stockopname.upper()
+                        ### Fungsi Konversi bytes to string - End 
                         jumlah_sku = len(sku_stockopname)/24
                         print(f"sku stockopname 1 : {sku_stockopname} jumlah : {jumlah_sku}")
                         if sku_stockopname != "00":
@@ -298,16 +317,16 @@ def rack2():
     while True :
         
         if len(state_stockopname) == 1:
-            
+            #State Stock opname ditemukan
             for coordinate in coordinate_rack:
                 
                 if coordinate[0] == "A21" and coordinate[1] == "notsukses":
-                    
+                    ### Fungsi Rack Scanner Mode Control - Start
                     data_send_stockopname = str(2) #Menyalakan Rack Scanner
                     data_send_encode_stockopname = data_send_stockopname + "\0"
                     port_socket[str(ip_port[coor_ip[coordinate[0]]])].sendto(data_send_encode_stockopname.encode(), (coor_ip[coordinate[0]], ip_port[coor_ip[coordinate[0]]]))
                     print(f"Data {data_send_stockopname} telah dikirim ke ESP32 dengan addr {coor_ip[coordinate[0]]} port {ip_port[coor_ip[coordinate[0]]]} untuk menyalakan Rack Scanner. (StockOpname)")
-                    
+                    ### Fungsi Rack Scanner Mode Control - End
                     try:
                         data_stockopname, addr_stockopname = ip_sock[coor_ip[coordinate[0]]].recvfrom(4096)
                         reply_stockopname = "sukses"
@@ -315,6 +334,7 @@ def rack2():
                         port_socket[str(ip_port[addr_stockopname[0]])].sendto(reply_encode_stockopname.encode(), (addr_stockopname[0], ip_port[addr_stockopname[0]]))
 
                         #data bytes dari ESP32 diubah menjadi array of integer
+                        ### Fungsi Konversi bytes to string - Start
                         i_stockopname = 0
                         arry_stockopname = []
 
@@ -348,7 +368,9 @@ def rack2():
                         for elemen_sku in arry_bytes_str_stockopname:
                             sku_stockopname = sku_stockopname + elemen_sku
                         
-                        sku_stockopname = sku_stockopname.upper() #cuma nerima dan ngirim 1 SKU
+                        sku_stockopname = sku_stockopname.upper()
+                        ### Fungsi Konversi bytes to string - End
+                               
                         jumlah_sku = len(sku_stockopname)/24
                         print(f"sku stockopname 2 : {sku_stockopname} jumlah : {jumlah_sku}")
                         if sku_stockopname != "00":
