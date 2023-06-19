@@ -195,7 +195,7 @@ while True:
                 #Raspi to database, sending tags (untuk sekarang per nerima dari data akuisisi kirim)
                 error = 0
 
-                ## Fungsi Send SKU - Start
+                ### Fungsi Send SKU - Start
                 for per_sku_send in sku_send:
                     
                     # URL endpoint API di Heroku
@@ -218,12 +218,12 @@ while True:
                         print(response_inbound.text)
                         print("")
                         error = error + 1
-                ## Fungsi Send SKU - End
+                ### Fungsi Send SKU - End
 
                 #Memastikan apakah ada eror selama pengiriman, jika ada maka isolasi barang 
                 if error == 0 :
 
-                    ## Fungsi Pull Respons - Start
+                    ### Fungsi Pull Respons - Start
                     url_done = "https://octagonwms.herokuapp.com/inbound/isdone"
 
                     # Data string yang akan dikirim ke server
@@ -286,7 +286,7 @@ while True:
                             
                             print(f"Data status inbound : Should be Isolated")
                      
-                    ## Fungsi Pull Respons - End
+                    ### Fungsi Pull Respons - End
                 else:
                     data_send_inbound = "notsukses"
                     data_send_inbound_encoding = data_send_inbound +"\0"
