@@ -35,7 +35,8 @@ while True:
     print("")
     print("Menunggu input dari scanner 1....")
     data_outbound, addr_outbound = sock.recvfrom(4096)
-    
+
+    ### Fungsi Konversi bytes to string - Start
     i_outbound = 0
     arry_outbound = []
 
@@ -73,7 +74,9 @@ while True:
     
     sku_outbound = sku_outbound.upper()
     print(f"sukses diterima awal outbound scanner 1 : {sku_outbound}")
-    
+    ### Fungsi Konversi bytes to string - End
+
+    #Menyimpan SKU dalam variabel sku_send
     sku_send = []
     jumlah_sku = int((len(sku_outbound))/24)
     indeks_sku_awal = 0
@@ -88,7 +91,8 @@ while True:
     print("Menunggu input dari scanner 2....")
     
     data_outbound, addr_outbound = sock.recvfrom(4096)
-    
+
+    ### Fungsi Konversi bytes to string - Start
     i_outbound = 0
     arry_outbound = []
 
@@ -127,6 +131,9 @@ while True:
     sku_outbound = sku_outbound.upper()
     print(f"sukses diterima awal outbound scanner 2 : {sku_outbound}")
     
+    ### Fungsi Konversi bytes to string - End
+
+    #Menyimpan data SKU yang terbaca dari scanner 2
     sku_scanner2 = []
     jumlah_sku = int((len(sku_outbound))/24)
     indeks_sku_awal = 0
@@ -137,7 +144,8 @@ while True:
         sku_scanner2.append(sku_outbound[indeks_sku_awal:indeks_sku_akhir])
         indeks_sku_awal = indeks_sku_awal + 24
         indeks_sku_akhir = indeks_sku_akhir + 24
-    
+
+    ### Fungsi Complement SKU - Start
     for order_sku in sku_scanner2:
         find_sku = 0
         
@@ -147,13 +155,14 @@ while True:
                 
         if find_sku == 0:
             sku_send.append(order_sku)
-         
-        
+    ### Fungsi Complement SKU - End     
+
+    ### Fungsi Check SKU - Start
     for search in sku_array_outbound:
     
         if sku_send == search:
             finds_outbound = 1
-
+    ### Fungsi Check SKU - end
     if finds_outbound == 1:
         
         print(f"SKU outbound : {sku_send} gagal dikirim karena sudah pernah diterima")
@@ -176,6 +185,8 @@ while True:
         
             #-----------------------------------------------------------------
             #Raspi to database, sending tags (untuk sekarang per baca kirim)
+
+            #Mengecek apakah SKU pada palet seragam atau tidak, jika tidak maka barang harus diisolasi
             count_qoly = 0
             one_sku = sku_send[0][0:6]
             for checker in sku_send:
@@ -183,7 +194,8 @@ while True:
                     count_qoly = count_qoly + 1
             
             if count_qoly == len(sku_send):
-                
+
+                ### Fungsi Send SKU - Start
                 data_status = ""
                 for per_sku_send in sku_send:
                     
@@ -207,8 +219,11 @@ while True:
                         print(f"Data sku outbound {per_sku_send} gagal dikirim ke server. Status code:", response_outbound.status_code)
                         print(response_outbound.text)
                         print("")
-                        
+                      
+                ### Fungsi Send SKU - End      
                 if data_status != "" :
+
+                    ### Fungsi Pull Respons - Start
                     complete = data_status["data"]
                     
                     if complete["complete"] == True:
@@ -233,6 +248,8 @@ while True:
                         data_send_outbound_encoding = data_send_outbound +"\0"
                         GateIn_sock.sendto(data_send_outbound_encoding.encode(), (IP_GateIn, PORT_GateIn))
                         print(f"Data status outbound : Should be Isolated")
+                      
+                    ### Fungsi Pull Respons - End
                 else:
                     #complete[0]["complete"] == False: ga ada feedback true
                     data_send_outbound = "notsukses"
