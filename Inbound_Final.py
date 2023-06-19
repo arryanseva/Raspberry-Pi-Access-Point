@@ -39,11 +39,13 @@ while True:
     print("#PRESS THE BUTTON#")
     print("")
     print("Menunggu input dari scanner 1....")
+
+    #Standby siap menerima data dari gatescanner 1
     data_inbound, addr_inbound = sock.recvfrom(4096)
     
     i_inbound = 0
     arry_inbound = []
-
+    ### Fungsi Konversi bytes to string - Start
     for elemen in data_inbound:
         arry_inbound.append(elemen)
         
@@ -74,7 +76,8 @@ while True:
 
     sku_inbound = sku_inbound.upper()
     print(f"sukses diterima awal inbound scanner 1 : {sku_inbound}")
-
+  
+    ### Fungsi Konversi bytes to string - End
     sku_send = []
     jumlah_sku = int((len(sku_inbound))/24)
     indeks_sku_awal = 0
@@ -88,9 +91,10 @@ while True:
     
     print("Menunggu input dari scanner 2....")
     
-
+    #Standby siap menerima data dari gatescanner 2
     data_inbound, addr_inbound = sock.recvfrom(4096)
 
+    ## Fungsi Konversi bytes to string - Start
     i_inbound = 0
     arry_inbound = []
 
@@ -125,7 +129,8 @@ while True:
 
     sku_inbound = sku_inbound.upper()
     print(f"sukses diterima awal inbound scanner 2 : {sku_inbound}")
-
+  
+    ## Fungsi Konversi bytes to string - End
     sku_scanner2 = []
     jumlah_sku = int((len(sku_inbound))/24)
     indeks_sku_awal = 0
@@ -136,7 +141,8 @@ while True:
         sku_scanner2.append(sku_inbound[indeks_sku_awal:indeks_sku_akhir])
         indeks_sku_awal = indeks_sku_awal + 24
         indeks_sku_akhir = indeks_sku_akhir + 24
-        
+
+    ## Fungsi Complement SKU - Start
     for order_sku in sku_scanner2:
         find_sku = 0
         
@@ -147,12 +153,15 @@ while True:
         if find_sku == 0:
             sku_send.append(order_sku)
         
+    ## Fungsi Complement SKU - End
 
+    ## Fungsi Check SKU - Start
     for search in sku_array_inbound:
         
         if sku_send == search:
             finds_inbound = 1
-
+    ## Fungsi Check SKU - End
+  
     if finds_inbound == 1:
         
         print(f"SKU inbound : {sku_send} gagal dikirim karena sudah pernah diterima")
