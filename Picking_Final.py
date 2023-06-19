@@ -402,12 +402,17 @@ def rack1():
                             if response_picking.status_code == 200:
                                 print("Data berhasil dikirim ke server dan Picking berhasil.")
                                 state_picking.remove(coordinate)
+                                print(f"state picking removed rack 1: {state_picking}")
+                                status_picking = 1
+                                print(f"Rack 1 : State_Picking {state_picking}")
                                 
-
                             else:
                                 print("Data gagal dikirim ke server. Status code:", response_picking.status_code)
                                 print(response_picking.text)
                                 state_picking.remove(coordinate)
+                                print(f"state picking removed rack 1: {state_picking}")
+                                status_picking = 1
+                                print(f"Rack 1 : State_Picking {state_picking}")
                                 
                     
                             print("")
@@ -616,11 +621,17 @@ def rack2():
                             if response_picking.status_code == 200:
                                 print("Data berhasil dikirim ke server dan Picking berhasil.")
                                 state_picking.remove(coordinate)
+                                print(f"state picking removed rack 2: {state_picking}")
+                                status_picking = 1
+                                print(f"Rack 2 : State_Picking {state_picking}")
 
                             else:
                                 print("Data gagal dikirim ke server. Status code:", response_picking.status_code)
                                 print(response_picking.text)
                                 state_picking.remove(coordinate)
+                                print(f"state picking removed rack 2: {state_picking}")
+                                status_picking = 1
+                                print(f"Rack 2 : State_Picking {state_picking}")
                     
                             print("")
                             
