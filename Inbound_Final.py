@@ -94,7 +94,7 @@ while True:
     #Standby siap menerima data dari gatescanner 2
     data_inbound, addr_inbound = sock.recvfrom(4096)
 
-    ## Fungsi Konversi bytes to string - Start
+    ### Fungsi Konversi bytes to string - Start
     i_inbound = 0
     arry_inbound = []
 
@@ -130,7 +130,7 @@ while True:
     sku_inbound = sku_inbound.upper()
     print(f"sukses diterima awal inbound scanner 2 : {sku_inbound}")
   
-    ## Fungsi Konversi bytes to string - End
+    ### Fungsi Konversi bytes to string - End
     sku_scanner2 = []
     jumlah_sku = int((len(sku_inbound))/24)
     indeks_sku_awal = 0
@@ -142,7 +142,7 @@ while True:
         indeks_sku_awal = indeks_sku_awal + 24
         indeks_sku_akhir = indeks_sku_akhir + 24
 
-    ## Fungsi Complement SKU - Start
+    ### Fungsi Complement SKU - Start
     for order_sku in sku_scanner2:
         find_sku = 0
         
@@ -153,14 +153,14 @@ while True:
         if find_sku == 0:
             sku_send.append(order_sku)
         
-    ## Fungsi Complement SKU - End
+    ### Fungsi Complement SKU - End
 
-    ## Fungsi Check SKU - Start
+    ### Fungsi Check SKU - Start
     for search in sku_array_inbound:
         
         if sku_send == search:
             finds_inbound = 1
-    ## Fungsi Check SKU - End
+    ### Fungsi Check SKU - End
   
     if finds_inbound == 1:
         
@@ -182,7 +182,8 @@ while True:
             print(f"SKU inbound berhasil diterima : {sku_send} :",len(sku_send)," ",counts_inbound)
             print("")
             counts_inbound = counts_inbound + 1
-            
+
+            #Mencari tahu apakah SKU seragam atau tidak, jika tidak auto barang harus diisolasi
             count_qoly = 0
             one_sku = sku_send[0][0:6]
             for checker in sku_send:
@@ -191,8 +192,10 @@ while True:
             
             if count_qoly == len(sku_send) :    
                 #-----------------------------------------------------------------
-                #Raspi to database, sending tags (untuk sekarang per baca kirim)
+                #Raspi to database, sending tags (untuk sekarang per nerima dari data akuisisi kirim)
                 error = 0
+
+                ## Fungsi Send SKU - Start
                 for per_sku_send in sku_send:
                     
                     # URL endpoint API di Heroku
@@ -215,9 +218,12 @@ while True:
                         print(response_inbound.text)
                         print("")
                         error = error + 1
-                        
+                ## Fungsi Send SKU - End
+
+                #Memastikan apakah ada eror selama pengiriman, jika ada maka isolasi barang 
                 if error == 0 :
-                
+
+                    ## Fungsi Pull Respons - Start
                     url_done = "https://octagonwms.herokuapp.com/inbound/isdone"
 
                     # Data string yang akan dikirim ke server
@@ -279,7 +285,8 @@ while True:
                             GateOut_sock.sendto(data_send_inbound_encoding.encode(), (IP_GateOut, PORT_GateOut))
                             
                             print(f"Data status inbound : Should be Isolated")
-                 
+                     
+                    ## Fungsi Pull Respons - End
                 else:
                     data_send_inbound = "notsukses"
                     data_send_inbound_encoding = data_send_inbound +"\0"
