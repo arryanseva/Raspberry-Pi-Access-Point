@@ -68,6 +68,7 @@ port_socket = {"1236" : first_sock,
                "1237" : second_sock}
 state_stocking = []
 
+### Fungsi Finding State Stocking - Start
 def searching():
     while True :
         time.sleep(1)
@@ -87,9 +88,9 @@ def searching():
             pprint.pprint(data_received_log_stocking)
             print("")
             
-            ####CUMA 1 stocking yang harus isfull :true  dan ischecked :false
             for data in data_received_log_stocking:
                 if (data["isFull"] == True and data["isUp"] == True and data["isChecked"] == False and data["isRequested"] == False and data["isDown"] == False):
+                    ### Fungsi Pull Data Barang - Start
                     coordinat_stocking = data["blok"] + str(data["level"]) + str(data["nomor_rak"])
                     coordinat_id_stocking = str(data["id"])
                     add_state_stocking = {"coordinat_stocking" : coordinat_stocking,
@@ -118,7 +119,8 @@ def searching():
                         print(response_cd_stocking.text)
                         
                     print("")
-                    
+                    ### Fungsi Pull Data Barang - End
+                           
                     find = 0 
                     for i in range (5):
                         
@@ -154,7 +156,7 @@ def searching():
                                 state_stocking.append(add_state_stocking)
                     else:
                         find = 0
-                    
+                #Pembatalan Proses Stocking    
                 if (data["isFull"] == True and data["isUp"] == False and data["isChecked"] == False and data["isRequested"] == False and data["isDown"] == False):
                     coordinat_stocking_cancel = data["blok"] + str(data["level"]) + str(data["nomor_rak"])
                     coordinat_id_stocking_cancel = str(data["id"])
@@ -198,12 +200,13 @@ def searching():
             print(response_log_stocking.text)
             
         print("")
+### Fungsi Finding State Stocking - End
 
 def rack1():
     while True :
         
         if len(state_stocking) != 0:
-            
+            # State Stocking ditemukan di rak 1
             for coordinate in state_stocking:
                 
                 if coordinate["coordinat_stocking"] == "A11":
@@ -212,15 +215,17 @@ def rack1():
                     
                     while match_stocking != 1 :
                         time.sleep(1)
+                        ### Fungsi Rack Scanner Mode Control - Start
                         data_send_stocking = str(1) #Menyalakan Rack Scanner
                         data_send_encode_stocking = data_send_stocking + "\0"
                         port_socket[str(ip_port[coor_ip[coordinate["coordinat_stocking"]]])].sendto(data_send_encode_stocking.encode(), (coor_ip[coordinate["coordinat_stocking"]], ip_port[coor_ip[coordinate["coordinat_stocking"]]]))
                         print("Data "+str(data_send_stocking)+" telah dikirim ke ESP32 dengan addr "+str(coor_ip[coordinate["coordinat_stocking"]])+" port "+str(ip_port[coor_ip[coordinate["coordinat_stocking"]]])+" untuk menyalakan Rack Scanner. (Stocking)")
-                        
+                        ### Fungsi Rack Scanner Mode Control - End
                         try:
                             data_stocking, addr_stocking = ip_sock[coor_ip[coordinate["coordinat_stocking"]]].recvfrom(4096)
                             
                             #data bytes dari ESP32 diubah menjadi array of integer
+                            ### Fungsi Konversi bytes to string - Start
                             i_stocking = 0
                             arry_stocking = []
 
@@ -256,7 +261,9 @@ def rack1():
                             
                             sku_stocking = sku_stocking.upper() #cuma nerima dan ngirim 1 SKU
                             print(f"SKU tocking : {sku_stocking}")
-                            
+                            ### Fungsi Konversi bytes to string - End
+                                   
+                            ### Fungsi Stocking Behavioral - Start
                             if sku_stocking != "00":
                                 
                                 sku_send = []
@@ -318,7 +325,7 @@ def rack1():
                                     port_socket[str(ip_port[coor_ip[coordinate["coordinat_stocking"]]])].sendto(reply_encode_stocking.encode(), (coor_ip[coordinate["coordinat_stocking"]], ip_port[coor_ip[coordinate["coordinat_stocking"]]]))
                                     print("Data "+str(reply_stocking)+" telah dikirim ke ESP32 dengan addr "+str(coor_ip[coordinate["coordinat_stocking"]])+" port "+str(ip_port[coor_ip[coordinate["coordinat_stocking"]]])+" untuk menunggu stocking. (Stocking)")
                                     
-                                
+                            ### Fungsi Stocking Behavioral - End    
                             print("")
                     
                         except socket.timeout:
@@ -336,7 +343,8 @@ def rack1():
                     print("Data "+str(reply_stocking)+" telah dikirim ke ESP32 dengan addr "+str(coor_ip[coordinate["coordinat_stocking"]])+" port "+str(ip_port[coor_ip[coordinate["coordinat_stocking"]]])+" telah berhasil stocking. (Stocking)")
                     
                     if (match_stocking == 1 and coordinate["status"] == "ON"):
-                        
+
+                        ### Fungsi Status Updater - Start
                         # URL endpoint API di Heroku
                         url_stocking = "https://octagonwms.herokuapp.com/coord/check"
 
@@ -348,7 +356,8 @@ def rack1():
                         headers_stocking ={'Content-type': 'application/json'}
                         # Mengirim data menggunakan metode POST dan headers yang sudah ditentukan
                         response_stocking = requests.put(url=url_stocking, data=json_data_stocking, headers=headers_stocking )
-
+                        ### Fungsi Status Updater - End
+           
                         # Mengecek respons dari server
                         if response_stocking.status_code == 200:
                             state_stocking.remove(coordinate)
@@ -358,10 +367,13 @@ def rack1():
 
                         else:
                             print("Data gagal dikirim ke server. Status code:", response_stocking.status_code)
+                            state_stocking.remove(coordinate)
                             print(response_stocking.text)
+                                   
 
                         print("")
                         
+                           
                     if (match_stocking == 1 and coordinate["status"] == "OFF"):
                         state_stocking.remove(coordinate)
                         
@@ -369,7 +381,7 @@ def rack2():
     while True :
         
         if len(state_stocking) != 0:
-            
+            #State Stocking ditemukan di rak 2
             for coordinate in state_stocking:
                 
                 if coordinate["coordinat_stocking"] == "A21":
@@ -378,15 +390,18 @@ def rack2():
                     
                     while match_stocking != 1 :
                         time.sleep(1)
+                        ### Fungsi Rack Scanner Mode Control - Start
                         data_send_stocking = str(1) #Menyalakan Rack Scanner
                         data_send_encode_stocking = data_send_stocking + "\0"
                         port_socket[str(ip_port[coor_ip[coordinate["coordinat_stocking"]]])].sendto(data_send_encode_stocking.encode(), (coor_ip[coordinate["coordinat_stocking"]], ip_port[coor_ip[coordinate["coordinat_stocking"]]]))
                         print("Data "+str(data_send_stocking)+" telah dikirim ke ESP32 dengan addr "+str(coor_ip[coordinate["coordinat_stocking"]])+" port "+str(ip_port[coor_ip[coordinate["coordinat_stocking"]]])+" untuk menyalakan Rack Scanner. (Stocking)")
-                        
+                        ### Fungsi Rack Scanner Mode Control - End
+                               
                         try:
                             data_stocking, addr_stocking = ip_sock[coor_ip[coordinate["coordinat_stocking"]]].recvfrom(4096)
                             
                             #data bytes dari ESP32 diubah menjadi array of integer
+                            ### Fungsi Konversi bytes to string - Start
                             i_stocking = 0
                             arry_stocking = []
 
@@ -422,7 +437,9 @@ def rack2():
                             
                             sku_stocking = sku_stocking.upper() #cuma nerima dan ngirim 1 SKU
                             print(f"SKU tocking : {sku_stocking}")
-                            
+                            ### Fungsi Konversi bytes to string - End
+
+                            ### Fungsi Stocking Behavioral - Start
                             if sku_stocking != "00":
                                 
                                 sku_send = []
@@ -484,7 +501,8 @@ def rack2():
                                     
                                 
                             print("")
-                    
+                            ### Fungsi Stocking Behavioral - End
+                               
                         except socket.timeout:
                             
                             reply_stocking = "notsukses"
@@ -500,7 +518,8 @@ def rack2():
                     print("Data "+str(reply_stocking)+" telah dikirim ke ESP32 dengan addr "+str(coor_ip[coordinate["coordinat_stocking"]])+" port "+str(ip_port[coor_ip[coordinate["coordinat_stocking"]]])+" telah berhasil stocking. (Stocking)")
                     
                     if (match_stocking == 1 and coordinate["status"] == "ON"):
-                        
+                               
+                        ### Fungsi Status Updater - Start
                         # URL endpoint API di Heroku
                         url_stocking = "https://octagonwms.herokuapp.com/coord/check"
 
@@ -512,6 +531,7 @@ def rack2():
                         headers_stocking ={'Content-type': 'application/json'}
                         # Mengirim data menggunakan metode POST dan headers yang sudah ditentukan
                         response_stocking = requests.put(url=url_stocking, data=json_data_stocking, headers=headers_stocking )
+                        ### Fungsi Status Updater - End
 
                         # Mengecek respons dari server
                         if response_stocking.status_code == 200:
@@ -522,6 +542,7 @@ def rack2():
 
                         else:
                             print("Data gagal dikirim ke server. Status code:", response_stocking.status_code)
+                            state_stocking.remove(coordinate)
                             print(response_stocking.text)
 
                         print("")
